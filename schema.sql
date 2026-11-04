@@ -1,0 +1,58 @@
+-- Stockroom Inventory Management
+-- Jalankan file ini pada database MySQL/MariaDB (phpMyAdmin atau terminal).
+
+CREATE DATABASE IF NOT EXISTS inventory_management
+  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE inventory_management;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  username VARCHAR(60) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  role ENUM('admin','staff') NOT NULL DEFAULT 'staff',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS categories (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL UNIQUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS suppliers (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  contact_person VARCHAR(100) NULL,
+  phone VARCHAR(30) NULL,
+  email VARCHAR(150) NULL,
+  address TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS products (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  category_id INT UNSIGNED NULL,
+  price DECIMAL(12,2) NOT NULL DEFAULT 0,
+  stock INT UNSIGNED NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_products_category FOREIGN KEY (category_id)
+    REFERENCES categories(id) ON UPDATE CASCADE ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS stock_movements (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  product_id INT UNSIGNED NOT NULL,
+  user_id INT UNSIGNED NOT NULL,
+  type ENUM('IN','OUT') NOT NULL,
+  quantity INT UNSIGNED NOT NULL,
+  note VARCHAR(500) NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_movement_product FOREIGN KEY (product_id)
+    REFERENCES products(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT fk_movement_user FOREIGN KEY (user_id)
+    REFERENCES users(id) ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- Buat hash password dengan password_hash() di PHP, jangan simpan password biasa.
